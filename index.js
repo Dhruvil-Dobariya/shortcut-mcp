@@ -18,7 +18,7 @@ server.tool(
     name: z.string(),
     description: z.string(),
     story_type: z.enum(["feature", "bug", "chore"]),
-    workflow_state_id: z.number().optional(),
+    workflow_state_id: z.coerce.number().optional(),
   },
   async ({ name, description, story_type, workflow_state_id }) => {
     const res = await axios.post(
