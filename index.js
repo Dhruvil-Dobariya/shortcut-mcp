@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import axios from "axios";
 import http from "http";
+import { z } from "zod";
 
 const SHORTCUT_TOKEN = process.env.SHORTCUT_API_KEY;
 const BASE_URL = process.env.SHORTCUT_BASE_URL;
@@ -14,10 +15,10 @@ const server = new McpServer({ name: "shortcut-mcp", version: "1.0.0" });
 server.tool(
   "create_story",
   {
-    name: String,
-    description: String,
-    story_type: String,
-    workflow_state_id: Number, // optional — falls back to DEFAULT_STATE_ID
+    name: z.string(),
+    description: z.string(),
+    story_type: z.enum(["feature", "bug", "chore"]),
+    workflow_state_id: z.number().optional(),
   },
   async ({ name, description, story_type, workflow_state_id }) => {
     const res = await axios.post(
