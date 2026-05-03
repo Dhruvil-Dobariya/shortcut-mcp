@@ -6,6 +6,7 @@ import http from "http";
 const SHORTCUT_TOKEN = process.env.SHORTCUT_API_KEY;
 const BASE_URL = process.env.SHORTCUT_BASE_URL;
 const PORT = process.env.PORT || 3000;
+const DEFAULT_STATE_ID = parseInt(process.env.SHORTCUT_DEFAULT_STATE_ID); // "To Do"
 
 const server = new McpServer({ name: "shortcut-mcp", version: "1.0.0" });
 
@@ -16,11 +17,17 @@ server.tool(
     name: String,
     description: String,
     story_type: String,
+    workflow_state_id: Number, // optional — falls back to DEFAULT_STATE_ID
   },
-  async ({ name, description, story_type }) => {
+  async ({ name, description, story_type, workflow_state_id }) => {
     const res = await axios.post(
       `${BASE_URL}/stories`,
-      { name, description, story_type },
+      {
+        name,
+        description,
+        story_type,
+        workflow_state_id: workflow_state_id || DEFAULT_STATE_ID,
+      },
       { headers: { "Shortcut-Token": SHORTCUT_TOKEN } },
     );
     return { content: [{ type: "text", text: JSON.stringify(res.data) }] };
@@ -54,7 +61,6 @@ const httpServer = http.createServer(async (req, res) => {
       }
     });
   } else if (req.method === "GET" && req.url === "/health") {
-    // Health check endpoint for Railway
     res.writeHead(200);
     res.end(JSON.stringify({ status: "ok", server: "shortcut-mcp" }));
   } else {
